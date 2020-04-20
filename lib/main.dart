@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_otp_authentication/screens/FinalScreen.dart';
 import 'package:flutter_otp_authentication/screens/LoginScreen.dart';
-import 'package:flutter_otp_authentication/screens/HomeScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
+  handleAuth() {
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.onAuthStateChanged,
+      builder: (BuildContext context,snapshot){
+        if(snapshot.hasData){
+          return FinalScreen();
+        }
+        else{
+          return LoginScreen();
+        }
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,7 +37,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: LoginScreen(),
+      home: this.handleAuth(),
     );
   }
 }

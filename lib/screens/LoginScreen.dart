@@ -135,7 +135,7 @@ class LoginScreen extends StatelessWidget {
                         elevation: 7.0,
                         child: GestureDetector(
                           onTap: () {
-                            final phone = _phoneController.text.trim();
+                            final phone ="+91"+ _phoneController.text.trim();
                             loginUser(phone, context);
                           },
                           child: Center(
