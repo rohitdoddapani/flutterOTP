@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_otp_authentication/screens/FinalScreen.dart';
 //import 'package:flutter_otp_authentication/Details.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 
 class HomeScreen extends StatelessWidget {
@@ -11,14 +11,26 @@ class HomeScreen extends StatelessWidget {
   String name;
   String email;
   String address;
+  String device;
 
   final db = Firestore.instance;
+
+  FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 
   final FirebaseUser user;
 
 //  final Details details;
 //  HomeScreen({Key key,@required this.details,this.user}) : super(key: key);
   HomeScreen({this.user});
+
+  _subscribetotop(top) async {
+    _firebaseMessaging.subscribeToTopic(top).then((_) {
+      print('subscribed');
+    }).catchError((error) {
+      print("error: $error");
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +119,21 @@ class HomeScreen extends StatelessWidget {
                       },
                     ),
                     SizedBox(height: 60.0),
+                    TextField(
+                      decoration: InputDecoration(
+                          labelText: 'Device ID',
+                          labelStyle: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.green))),
+                      onChanged: (val){
+                        this.device = val;
+                      },
+                    ),
+
+                    SizedBox(height: 60.0),
                     Container(
                       height: 40.0,
                       child: Material(
@@ -117,13 +144,18 @@ class HomeScreen extends StatelessWidget {
                         child: GestureDetector(
                           onTap: () async {
                             //Insert into firebase
+                            print(this.name);
+                            print(this.email);
+                            print(this.address);
                             if(this.name !=null && this.email!=null && this.address!=null) {
+                              _subscribetotop(this.device);
                               await db.collection("Users").add(
                                   {
                                     'name': this.name,
                                     'email': this.email,
                                     'Address': this.address,
-                                    'Phone': user.phoneNumber
+                                    'Phone': user.phoneNumber,
+                                    'Device-id': this.device
                                   })
                                   .then((result) => print("success"))
                                   .catchError((err) => print(err));
