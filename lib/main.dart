@@ -74,7 +74,7 @@ class _MyAppState extends State<MyApp> {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: LoginScreen(),
+      home: this.handleAuth(),
     );
   }
 }

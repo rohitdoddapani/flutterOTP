@@ -1,6 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_otp_authentication/screens/LoginScreen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FinalScreen extends StatelessWidget {
+
+  final db = Firestore.instance;
+
+  handleAuth() {
+    print('called');
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.onAuthStateChanged,
+      builder: (BuildContext context, snapshot) {
+        if (snapshot.hasData) {
+          return FinalScreen();
+        }
+        else {
+          return LoginScreen();
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +49,37 @@ class FinalScreen extends StatelessWidget {
                             fontSize: 80.0,
                             fontWeight: FontWeight.bold,
                             color: Colors.green)),
-                  )
+                  ),
+                  Container(
+                    padding: EdgeInsets.fromLTRB(10.0, 350.0, 10.0, 0.0),
+
+                    child: Material(
+                      borderRadius: BorderRadius.circular(20.0),
+                      shadowColor: Colors.greenAccent,
+                      color: Colors.green,
+                      elevation: 7.0,
+                      child: GestureDetector(
+                        onTap: () async {
+                          final FirebaseAuth _auth = FirebaseAuth.instance;
+                          await _auth.signOut();
+                          print('logging out');
+                          this.handleAuth();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(18.0),
+                          child: Center(
+                            child: Text(
+                              'Logout',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Montserrat'),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

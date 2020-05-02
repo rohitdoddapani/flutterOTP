@@ -1,10 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_otp_authentication/screens/HomeScreen.dart';
+import 'package:flutter_otp_authentication/screens/FinalScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatelessWidget {
   final _phoneController = TextEditingController();
   final _codeController = TextEditingController();
+
+  final db = Firestore.instance;
 
   Future<bool> loginUser(String phone, BuildContext context) async{
     FirebaseAuth _auth = FirebaseAuth.instance;
@@ -19,15 +23,28 @@ class LoginScreen extends StatelessWidget {
 
           FirebaseUser user = result.user;
 
-          if(user != null){
-            Navigator.push(context, MaterialPageRoute(
-                builder: (context) => HomeScreen(user: user,)
-            ));
+          //checking for if the user have already filled form
+          DocumentReference docref = db.collection('ExistingUsers').document('users');
+          DocumentSnapshot doc = await docref.get();
+          List data = doc.data['data'];
+          print(data);
+          var x = data.contains(user.phoneNumber);
+          print(x);
+          if(data.contains(user.phoneNumber)==false) {
+            if (user != null) {
+              Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => HomeScreen(user: user,)
+              ));
+            } else {
+              print("Error");
+            }
           }else{
-            print("Error");
+            Navigator.push(context, MaterialPageRoute(
+                builder: (context) => FinalScreen()
+            ));
           }
 
-          //This callback would gets called when verification is done auto maticlly
+          //This callback would gets called when verification is done automaticlly
         },
         verificationFailed: (AuthException exception){
           print(exception);
@@ -53,7 +70,7 @@ class LoginScreen extends StatelessWidget {
                       textColor: Colors.white,
                       color: Colors.blue,
                       onPressed: () async{
-                        final code = _codeController.text.trim();
+                        final code = _codeController.text;
                         AuthCredential credential = PhoneAuthProvider.getCredential(verificationId: verificationId, smsCode: code);
 
                         AuthResult result = await _auth.signInWithCredential(credential);
@@ -67,6 +84,8 @@ class LoginScreen extends StatelessWidget {
                         }else{
                           print("Error");
                         }
+
+
                       },
                     )
                   ],
@@ -150,66 +169,9 @@ class LoginScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-
                   ],
                 )),
-
           ],
         ));
-//        body: SingleChildScrollView(
-//          child: Container(
-//            padding: EdgeInsets.all(32),
-//            child: Form(
-//              child: Column(
-//                crossAxisAlignment: CrossAxisAlignment.start,
-//                mainAxisAlignment: MainAxisAlignment.center,
-//                children: <Widget>[
-//                  Text("Login", style: TextStyle(color: Colors.lightBlue, fontSize: 36, fontWeight: FontWeight.w500),),
-//
-//                  SizedBox(height: 16,),
-//
-//                  TextFormField(
-//                    keyboardType: TextInputType.phone,
-//                    decoration: InputDecoration(
-//                        enabledBorder: OutlineInputBorder(
-//                            borderRadius: BorderRadius.all(Radius.circular(8)),
-//                            borderSide: BorderSide(color: Colors.grey[200])
-//                        ),
-//                        focusedBorder: OutlineInputBorder(
-//                            borderRadius: BorderRadius.all(Radius.circular(8)),
-//                            borderSide: BorderSide(color: Colors.grey[300])
-//                        ),
-//                        filled: true,
-//                        fillColor: Colors.grey[100],
-//                        hintText: "Mobile Number"
-//
-//                    ),
-//                    controller: _phoneController,
-//                  ),
-//
-//                  SizedBox(height: 16,),
-//
-//
-//                  Container(
-//                    width: double.infinity,
-//                    child: FlatButton(
-//                      child: Text("LOGIN"),
-//                      textColor: Colors.white,
-//                      padding: EdgeInsets.all(16),
-//                      onPressed: () {
-//                        final phone = _phoneController.text.trim();
-//
-//                        loginUser(phone, context);
-//
-//                      },
-//                      color: Colors.blue,
-//                    ),
-//                  )
-//                ],
-//              ),
-//            ),
-//          ),
-//        )
-//    );
   }
 }

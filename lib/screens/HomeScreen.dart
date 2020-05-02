@@ -147,6 +147,7 @@ class HomeScreen extends StatelessWidget {
                             print(this.name);
                             print(this.email);
                             print(this.address);
+
                             if(this.name !=null && this.email!=null && this.address!=null) {
                               _subscribetotop(this.device);
                               await db.collection("Users").add(
@@ -156,6 +157,14 @@ class HomeScreen extends StatelessWidget {
                                     'Address': this.address,
                                     'Phone': user.phoneNumber,
                                     'Device-id': this.device
+                                  })
+                                  .then((result) => print("success"))
+                                  .catchError((err) => print(err));
+                              var list = List<String>();
+                              list.add(user.phoneNumber);
+                              await db.collection("ExistingUsers").document('users').updateData(
+                                  {
+                                    'data': FieldValue.arrayUnion(list)
                                   })
                                   .then((result) => print("success"))
                                   .catchError((err) => print(err));
